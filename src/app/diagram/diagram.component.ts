@@ -15,6 +15,15 @@ import {from, map, Observable, Subscription, switchMap} from "rxjs";
 import * as BpmnJS from 'bpmn-js/dist/bpmn-modeler.production.min.js';
 import BpmnViewer from 'bpmn-js/lib/NavigatedViewer';
 import BpmnModeler from 'bpmn-js/lib/Modeler';
+// @ts-ignore
+import minimapModule from 'diagram-js-minimap';
+// @ts-ignore
+import BpmnColorPickerModule from 'bpmn-js-color-picker';
+// // @ts-ignore
+// import {
+//   BpmnPropertiesPanelModule,
+//   BpmnPropertiesProviderModule
+// } from 'bpmn-js-properties-panel';
 
 @Component({
   selector: 'app-diagram',
@@ -31,9 +40,17 @@ export class DiagramComponent implements AfterContentInit, OnChanges, OnDestroy,
 
   // private bpmnJS: BpmnJS = new BpmnJS();
   // bpmnJS = new BpmnViewer();
-  bpmnJS = new BpmnJS();
-  // bpmnModeler = new BpmnModeler({keyboard: {bindTo: document}});
-  // bpmnViewer = new BpmnViewer();
+  bpmnJS = new BpmnJS({
+    additionalModules: [
+      minimapModule,
+      BpmnColorPickerModule,
+    ]
+  });
+  modelXml = '';
+  bpmnModeler = new BpmnModeler({
+    keyboard: {bindTo: document},
+  });
+  bpmnViewer = new BpmnViewer();
 
   constructor(private http: HttpClient) {
     console.log(this.bpmnJS);
@@ -47,6 +64,7 @@ export class DiagramComponent implements AfterContentInit, OnChanges, OnDestroy,
 
     this.getEvents();
     // this.addOverlays();
+    this.getElements();
   }
 
   ngAfterContentInit(): void {
@@ -94,9 +112,30 @@ export class DiagramComponent implements AfterContentInit, OnChanges, OnDestroy,
         // e.element = the model element
         // e.gfx = the graphical element
 
-        console.log(event, 'on', typeof e, e);
+        // console.log(event, 'on', e);
       });
     });
+  }
+
+  getElements() {
+    var elementRegistry = this.bpmnJS.get('elementRegistry');
+
+    console.log(elementRegistry);
+    console.log(elementRegistry._elements);
+    for (const elementId in elementRegistry._elements) {
+      const elementObject = elementRegistry._elements[elementId];
+      console.log(elementObject)
+      // Process the elementObject
+    }
+    // console.log(elementRegistry._elements.get('SCAN_OK'))
+    // var sequenceFlowElement = elementRegistry.get('SequenceFlow_1'),
+    //   sequenceFlow = sequenceFlowElement.businessObject;
+    //
+    // sequenceFlow.name; // 'YES'
+    // sequenceFlow.conditionExpression; // ModdleElement { $type: 'bpmn:FormalExpression', ... }
+    //
+    // var moddle = this.bpmnJS.get('moddle');
+
   }
 
   loadUrl(url: string): Subscription {
@@ -123,7 +162,9 @@ export class DiagramComponent implements AfterContentInit, OnChanges, OnDestroy,
   }
 
   saveXml() {
-    this.bpmnJS.saveXML({format: true}).then((xml: any) => console.log(xml.xml));
+    this.bpmnJS.saveXML({format: true}).then((xml: any) => {
+      this.modelXml = xml.xml;
+    });
   }
 
   private importDiagram(xml: string): Observable<{warnings: Array<any>}> {
