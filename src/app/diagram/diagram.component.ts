@@ -11,19 +11,17 @@ import {
 import {HttpClient} from "@angular/common/http";
 import {from, map, Observable, Subscription, switchMap} from "rxjs";
 
-// @ts-ignore
-import * as BpmnJS from 'bpmn-js/dist/bpmn-modeler.production.min.js';
-import BpmnViewer from 'bpmn-js/lib/NavigatedViewer';
 import BpmnModeler from 'bpmn-js/lib/Modeler';
+import Modeler from "bpmn-js/lib/Modeler";
+import {
+    BpmnPropertiesPanelModule,
+    BpmnPropertiesProviderModule
 // @ts-ignore
-import minimapModule from 'diagram-js-minimap';
+} from 'bpmn-js-properties-panel';
 // @ts-ignore
-import BpmnColorPickerModule from 'bpmn-js-color-picker';
-// // @ts-ignore
-// import {
-//   BpmnPropertiesPanelModule,
-//   BpmnPropertiesProviderModule
-// } from 'bpmn-js-properties-panel';
+import customControlsModule from './custom-providers/palette';
+// @ts-ignore
+import customPropertiesProviderModule from './custom-providers/properties';
 
 @Component({
   selector: 'app-diagram',
@@ -31,8 +29,10 @@ import BpmnColorPickerModule from 'bpmn-js-color-picker';
   styleUrls: ['./diagram.component.scss']
 })
 export class DiagramComponent implements AfterContentInit, OnChanges, OnDestroy, OnInit {
-  @ViewChild('ref', {static: true})
-  diagramRef!: ElementRef
+  @ViewChild('diagram')
+  diagramRef!: ElementRef;
+    @ViewChild('properties')
+    propertiesRef!: ElementRef;
   @Input()
   url?: string;
   @Output()
@@ -40,102 +40,197 @@ export class DiagramComponent implements AfterContentInit, OnChanges, OnDestroy,
 
   // private bpmnJS: BpmnJS = new BpmnJS();
   // bpmnJS = new BpmnViewer();
-  bpmnJS = new BpmnJS({
-    additionalModules: [
-      minimapModule,
-      BpmnColorPickerModule,
-    ]
-  });
+  // bpmnJS = new BpmnJS({
+  //   additionalModules: [
+  //       BpmnPropertiesPanelModule,
+  //       BpmnPropertiesProviderModule,
+  //     minimapModule,
+  //     BpmnColorPickerModule,
+  //   ]
+  // });
+
   modelXml = '';
-  bpmnModeler = new BpmnModeler({
-    keyboard: {bindTo: document},
-  });
-  bpmnViewer = new BpmnViewer();
+  // bpmnModeler = new BpmnModeler({
+  //   keyboard: {bindTo: document},
+  // });
+  // bpmnViewer = new BpmnViewer();
+    bpmnModeler?: Modeler;
+    // bpmnJS?: BpmnJS;
 
   constructor(private http: HttpClient) {
-    console.log(this.bpmnJS);
+    // const _getPaletteEntries = PaletteProvider.prototype.getPaletteEntries;
+    // PaletteProvider.prototype.getPaletteEntries = () => {
+    //   console.log("palette");
+    //   console.log(this);
+    //   return _getPaletteEntries.apply(this);
+    // }
+    // console.log("bpmnJS: ", this.bpmnJS);
     // @ts-ignore
-    this.bpmnJS.on('import.done', ({error}) => {
-      if (!error) {
-        console.log('Fit viewport')
-        // this.bpmnJS.get('canvas').zoom('fit-viewport')
-      }
-    });
+    // this.bpmnJS.on('import.done', ({error}) => {
+    //   if (!error) {
+    //     console.log('Fit viewport')
+    //     // this.bpmnJS.get('canvas').zoom('fit-viewport')
+    //   }
+    // });
 
-    this.getEvents();
+    // this.getEvents();
     // this.addOverlays();
-    this.getElements();
+    // this.getElements();
+    // console.log(PaletteProvider.prototype.getPaletteEntries())
+    // const _getPaletteEntries = PaletteProvider.prototype.getPaletteEntries;
+    // PaletteProvider.prototype.getPaletteEntries = () => {
+    //   console.log(this)
+    //   let entries = _getPaletteEntries.apply(this);
+    //   console.log(entries);
+    //   return entries;
+    //
+    // }
   }
 
   ngAfterContentInit(): void {
-    this.bpmnJS.attachTo(this.diagramRef.nativeElement);
+    console.log(this.diagramRef)
+    // this.bpmnJS.attachTo(this.diagramRef.nativeElement);
     // this.bpmnModeler.attachTo(this.diagramRef.nativeElement);
     // this.bpmnViewer.attachTo(this.diagramRef.nativeElement);
-    // console.log(this.bpmnJS);
-    // console.log(this.bpmnModeler);
-    // console.log(this.bpmnViewer);
+    // console.log("bpmnJS", this.bpmnJS);
+    // console.log("bpmnModeler", this.bpmnModeler);
+    // console.log("bpmnViewer", this.bpmnViewer);
+    //   console.log(this.bpmnModeler.get('propertiesPanel'))
+  }
+
+  ngAfterViewInit(): void {
+    console.log("After view init: ", this.diagramRef);
+      this.bpmnModeler = new Modeler({
+          container: this.diagramRef.nativeElement,
+          width: '100%',
+          height: '600px',
+            additionalModules: [
+                BpmnPropertiesPanelModule,
+                BpmnPropertiesProviderModule,
+              customControlsModule,
+                customPropertiesProviderModule,
+            ],
+          propertiesPanel: {
+              parent: this.propertiesRef.nativeElement,
+          }
+      });
+      console.log("Created")
+      // this.bpmnJS = new BpmnJS({
+      //     container: '#canvas',
+      //     propertiesPanel: {
+      //         parent: '#properties'
+      //     }
+      // })
+      if (this.url) {
+          this.loadUrl(this.url);
+      }
+      this.getEvents();
+      this.getElements();
   }
 
   ngOnInit(): void {
+    console.log(this.diagramRef)
+
     if (this.url) {
       this.loadUrl(this.url);
     }
+    this.getEvents();
+    this.getElements();
   }
 
   ngOnChanges(changes: SimpleChanges) {
     // re-import whenever the url changes
-    if (changes['url']) {
+    if (changes['url'] && this.bpmnModeler) {
       this.loadUrl(changes['url'].currentValue);
     }
   }
 
   ngOnDestroy(): void {
-    this.bpmnJS.destroy();
+    // this.bpmnJS.destroy();
+      this.bpmnModeler?.destroy();
   }
 
   private getEvents() {
-    var eventBus = this.bpmnJS.get('eventBus');
+    if (!this.bpmnModeler) {
+      return;
+    }
+
+    this.bpmnModeler.on('element.changed', (event) => {
+      console.log(event)
+    })
+    this.bpmnModeler.on('element.hover', (event) => {
+      // console.log(event)
+    })
+
+    // var eventBus = this.bpmnModeler.get('eventBus');
 
 // you may hook into any of the following events
-    var events = [
-      'element.hover',
-      'element.out',
-      'element.click',
-      'element.dblclick',
-      'element.mousedown',
-      'element.mouseup'
-    ];
-
-    events.forEach(function(event) {
-
-      eventBus.on(event, function(e: object) {
-        // e.element = the model element
-        // e.gfx = the graphical element
-
-        // console.log(event, 'on', e);
-      });
-    });
+//     var events = [
+//       'element.hover',
+//       'element.out',
+//       'element.click',
+//       'element.dblclick',
+//       'element.mousedown',
+//       'element.mouseup'
+//     ];
+//
+//     events.forEach(function(event) {
+//
+//       eventBus.on(event, function(e: object) {
+//         // e.element = the model element
+//         // e.gfx = the graphical element
+//
+//         // console.log(event, 'on', e);
+//       });
+//     });
   }
 
   getElements() {
-    var elementRegistry = this.bpmnJS.get('elementRegistry');
-
-    console.log(elementRegistry);
-    console.log(elementRegistry._elements);
-    for (const elementId in elementRegistry._elements) {
-      const elementObject = elementRegistry._elements[elementId];
-      console.log(elementObject)
-      // Process the elementObject
+    if (!this.bpmnModeler) {
+      return;
     }
-    // console.log(elementRegistry._elements.get('SCAN_OK'))
-    // var sequenceFlowElement = elementRegistry.get('SequenceFlow_1'),
-    //   sequenceFlow = sequenceFlowElement.businessObject;
-    //
-    // sequenceFlow.name; // 'YES'
-    // sequenceFlow.conditionExpression; // ModdleElement { $type: 'bpmn:FormalExpression', ... }
-    //
-    // var moddle = this.bpmnJS.get('moddle');
 
+    const elementReg: object = this.bpmnModeler.get('elementRegistry');
+    // console.log(this.bpmnViewer.get('elementRegistry'))
+    console.log("Registry from modeler")
+    console.log(elementReg)
+    // @ts-ignore
+    console.log(elementReg.get('SCAN_OK'))
+
+    // var elementRegistry = this.bpmnJS.get('elementRegistry');
+    //
+    // console.log("Element registry: ", elementRegistry);
+    // console.log("Elements: ", elementRegistry._elements);
+    // Object.entries(elementRegistry._elements).forEach((key, item) => {
+    //   console.log(key, ": ", item);
+    // })
+    // for (const elementId in elementRegistry._elements) {
+    //   const elementObject = elementRegistry._elements[elementId];
+    //   console.log("Element registry: ", elementObject)
+    //   // Process the elementObject
+    //   // console.log(elementObject);
+    // }
+    // // console.log(elementRegistry._elements.get('SCAN_OK'))
+    // var sequenceFlowElement = elementRegistry.get('SCAN_OK');
+    // console.log("Registry element: ", sequenceFlowElement);
+    // //   sequenceFlow = sequenceFlowElement.businessObject;
+    // //
+    // // sequenceFlow.name; // 'YES'
+    // // sequenceFlow.conditionExpression; // ModdleElement { $type: 'bpmn:FormalExpression', ... }
+    // //
+    // var moddle = this.bpmnJS.get('moddle');
+    // console.log("Moddle: ", moddle);
+    // var newCondition = moddle.create('bpmn:FormalExpression', {
+    //   body: '${ value > 100 }'
+    // });
+    // console.log("new condition", newCondition);
+    //
+    // // var modeling = this.bpmnJS.get('modeling');
+    // // console.log(modeling);
+    // //
+    // // modeling.updateProperties(sequenceFlowElement, {
+    // //   conditionExpression: newCondition
+    // // });
   }
 
   loadUrl(url: string): Subscription {
@@ -162,12 +257,14 @@ export class DiagramComponent implements AfterContentInit, OnChanges, OnDestroy,
   }
 
   saveXml() {
-    this.bpmnJS.saveXML({format: true}).then((xml: any) => {
+    this.bpmnModeler?.saveXML({format: true}).then((xml: any) => {
       this.modelXml = xml.xml;
     });
   }
 
   private importDiagram(xml: string): Observable<{warnings: Array<any>}> {
-    return from(this.bpmnJS.importXML(xml) as Promise<{warnings: Array<any>}>);
+    // return from(this.bpmnJS.importXML(xml) as Promise<{warnings: Array<any>}>);
+    //   console.log(xml);
+    return from(this.bpmnModeler?.importXML(xml) as Promise<{warnings: Array<any>}>);
   }
 }

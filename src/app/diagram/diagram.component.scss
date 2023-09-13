@@ -1,5 +1,21 @@
+.wrapper {
+  display: flex;
+}
 .diagram-container {
-  height: 60vh;
-  width: calc(100vw - 4px);
   border: 2px red solid;
+  width: 80%;
+}
+
+.properties-panel {
+  width: 20%;
+  border: 2px green solid;
+}
+
+.properties-panel:empty {
+  //display: none;
+}
+
+.properties-panel > .djs-properties-panel {
+  //padding-bottom: 70px;
+  //min-height: 100%;
 }

@@ -8,6 +8,8 @@ import { Component } from '@angular/core';
 export class AppComponent {
   title = 'bpmn-poc';
   diagramUrl = 'https://cdn.staticaly.com/gh/bpmn-io/bpmn-js-examples/dfceecba/starter/diagram.bpmn';
+  // diagramUrl = 'https://raw.githubusercontent.com/bpmn-io/bpmn-js-examples/main/bpmn-properties/test/spec/diagram.bpmn';
+  //   diagramUrl = 'https://raw.githubusercontent.com/bpmn-io/bpmn-js-examples/main/properties-panel/resources/newDiagram.bpmn';
 
   handleImported(event: any) {
 

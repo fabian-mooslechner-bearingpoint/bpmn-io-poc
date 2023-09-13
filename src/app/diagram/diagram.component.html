@@ -1,3 +1,6 @@
-<div #ref class="diagram-container"></div>
+<div class="wrapper">
+  <div #diagram id="diagram" class="diagram-container"></div>
+  <div #properties class="properties-panel" id="properties"></div>
+</div>
 <button (click)="saveXml()">SAve xml</button>
 <pre>{{ modelXml }}</pre>
