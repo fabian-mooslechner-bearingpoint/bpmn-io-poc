@@ -5,6 +5,7 @@ import customProps from "./props/CustomProps";
 // import customProps from "./props/CustomProps";
 // import customGroup from "./props/CustomGroup";
 import {is} from "bpmn-js/lib/util/ModelUtil";
+import CustomList from "./props/CustomList";
 
 var LOW_PRIORITY = 500;
 
@@ -29,7 +30,8 @@ export default function CustomPropertiesProvider(propertiesPanel, translate) {
 
             let generalGroup = groups.find((e) => e.id === "general");
             console.log("generalTab", generalGroup)
-            const elements = generalGroup.elements;
+            const elements = generalGroup.entries;
+            console.log(elements)
 
             // let generalGroup = groups.find((e) => e.id === "general");
 
@@ -53,6 +55,8 @@ export default function CustomPropertiesProvider(propertiesPanel, translate) {
 
                 // groups = [generalTab];
             }
+
+            groups.push(CustomList());
 
             return groups;
         };

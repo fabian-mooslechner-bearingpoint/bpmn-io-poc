@@ -25,7 +25,8 @@
     ],
     "typeRoots": [
       "node_modules/@types"
-    ]
+    ],
+    "jsx": "react"
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

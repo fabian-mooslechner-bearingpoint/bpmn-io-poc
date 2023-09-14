@@ -21,7 +21,6 @@ export default class CustomPalette {
         }
 
         return function (entries) {
-            console.log("palette entries: ", entries)
             delete entries["create.group"];
             delete entries["create.participant-expanded"];
             delete entries["create.data-store"];

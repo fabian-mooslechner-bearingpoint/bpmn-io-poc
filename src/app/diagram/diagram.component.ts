@@ -22,6 +22,11 @@ import {
 import customControlsModule from './custom-providers/palette';
 // @ts-ignore
 import customPropertiesProviderModule from './custom-providers/properties';
+import {DEFAULT_LABEL_SIZE} from "bpmn-js/lib/util/LabelUtil";
+import height = DEFAULT_LABEL_SIZE.height;
+
+// @ts-ignore
+import customPropertiesProvider from './custom-providers/custom-properties/custom-property-provider';
 
 @Component({
   selector: 'app-diagram',
@@ -108,7 +113,7 @@ export class DiagramComponent implements AfterContentInit, OnChanges, OnDestroy,
                 BpmnPropertiesPanelModule,
                 BpmnPropertiesProviderModule,
               customControlsModule,
-                customPropertiesProviderModule,
+                customPropertiesProvider,
             ],
           propertiesPanel: {
               parent: this.propertiesRef.nativeElement,
@@ -155,8 +160,11 @@ export class DiagramComponent implements AfterContentInit, OnChanges, OnDestroy,
       return;
     }
 
-    this.bpmnModeler.on('element.changed', (event) => {
-      console.log(event)
+    this.bpmnModeler.on('element.changed', (event: any) => {
+      console.log("Event: ", event)
+      const element = event['element'];
+      console.log(element);
+      console.log(element.type, ": ", element.id, ", ", element.height, "x", element.width);
     })
     this.bpmnModeler.on('element.hover', (event) => {
       // console.log(event)

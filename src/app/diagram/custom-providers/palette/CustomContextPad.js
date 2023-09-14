@@ -36,7 +36,6 @@ export default class CustomContextPad {
     }
 
     return function (entries) {
-      console.log("contextPad: ", entries)
       if (element.type === "bpmn:ServiceTask") {
         delete entries["replace"];
       }
