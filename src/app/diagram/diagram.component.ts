@@ -11,7 +11,6 @@ import {
 import {HttpClient} from "@angular/common/http";
 import {from, map, Observable, Subscription, switchMap} from "rxjs";
 
-import BpmnModeler from 'bpmn-js/lib/Modeler';
 import Modeler from "bpmn-js/lib/Modeler";
 import {
     BpmnPropertiesPanelModule,
@@ -20,11 +19,6 @@ import {
 } from 'bpmn-js-properties-panel';
 // @ts-ignore
 import customControlsModule from './custom-providers/palette';
-// @ts-ignore
-import customPropertiesProviderModule from './custom-providers/properties';
-import {DEFAULT_LABEL_SIZE} from "bpmn-js/lib/util/LabelUtil";
-import height = DEFAULT_LABEL_SIZE.height;
-
 // @ts-ignore
 import customPropertiesProvider from './custom-providers/custom-properties/custom-property-provider';
 

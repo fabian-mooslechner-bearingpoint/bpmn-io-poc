@@ -1,6 +1,8 @@
-<div class="wrapper">
+<div class="diagram-wrapper">
   <div #diagram id="diagram" class="diagram-container"></div>
   <div #properties class="properties-panel" id="properties"></div>
 </div>
-<button (click)="saveXml()">SAve xml</button>
-<pre>{{ modelXml }}</pre>
+<div class="output-wrapper">
+  <button (click)="saveXml()">Save xml</button>
+  <pre>{{ modelXml }}</pre>
+</div>
