@@ -1,5 +1,5 @@
 import {
-  AfterContentInit,
+  AfterContentInit, AfterViewInit,
   Component,
   ElementRef,
   EventEmitter,
@@ -33,7 +33,7 @@ import customPropertiesProvider from './custom-providers/custom-properties/custo
   templateUrl: './diagram.component.html',
   styleUrls: ['./diagram.component.scss']
 })
-export class DiagramComponent implements AfterContentInit, OnChanges, OnDestroy, OnInit {
+export class DiagramComponent implements AfterViewInit, OnChanges, OnDestroy, OnInit {
   @ViewChild('diagram')
   diagramRef!: ElementRef;
     @ViewChild('properties')
@@ -43,99 +43,37 @@ export class DiagramComponent implements AfterContentInit, OnChanges, OnDestroy,
   @Output()
   importDone: EventEmitter<any> = new EventEmitter();
 
-  // private bpmnJS: BpmnJS = new BpmnJS();
-  // bpmnJS = new BpmnViewer();
-  // bpmnJS = new BpmnJS({
-  //   additionalModules: [
-  //       BpmnPropertiesPanelModule,
-  //       BpmnPropertiesProviderModule,
-  //     minimapModule,
-  //     BpmnColorPickerModule,
-  //   ]
-  // });
-
   modelXml = '';
-  // bpmnModeler = new BpmnModeler({
-  //   keyboard: {bindTo: document},
-  // });
-  // bpmnViewer = new BpmnViewer();
-    bpmnModeler?: Modeler;
-    // bpmnJS?: BpmnJS;
+  bpmnModeler: Modeler = new Modeler({
+    // container: this.diagramRef.nativeElement,
+    width: '100%',
+    height: '600px',
+    additionalModules: [
+      BpmnPropertiesPanelModule,
+      BpmnPropertiesProviderModule,
+      customControlsModule,
+      customPropertiesProvider,
+    ],
+    propertiesPanel: {
+      // parent: this.propertiesRef.nativeElement,
+    }
+  });
+  propertiesPanel = this.bpmnModeler.get('propertiesPanel');
 
   constructor(private http: HttpClient) {
-    // const _getPaletteEntries = PaletteProvider.prototype.getPaletteEntries;
-    // PaletteProvider.prototype.getPaletteEntries = () => {
-    //   console.log("palette");
-    //   console.log(this);
-    //   return _getPaletteEntries.apply(this);
-    // }
-    // console.log("bpmnJS: ", this.bpmnJS);
-    // @ts-ignore
-    // this.bpmnJS.on('import.done', ({error}) => {
-    //   if (!error) {
-    //     console.log('Fit viewport')
-    //     // this.bpmnJS.get('canvas').zoom('fit-viewport')
-    //   }
-    // });
 
-    // this.getEvents();
-    // this.addOverlays();
-    // this.getElements();
-    // console.log(PaletteProvider.prototype.getPaletteEntries())
-    // const _getPaletteEntries = PaletteProvider.prototype.getPaletteEntries;
-    // PaletteProvider.prototype.getPaletteEntries = () => {
-    //   console.log(this)
-    //   let entries = _getPaletteEntries.apply(this);
-    //   console.log(entries);
-    //   return entries;
-    //
-    // }
-  }
-
-  ngAfterContentInit(): void {
-    console.log(this.diagramRef)
-    // this.bpmnJS.attachTo(this.diagramRef.nativeElement);
-    // this.bpmnModeler.attachTo(this.diagramRef.nativeElement);
-    // this.bpmnViewer.attachTo(this.diagramRef.nativeElement);
-    // console.log("bpmnJS", this.bpmnJS);
-    // console.log("bpmnModeler", this.bpmnModeler);
-    // console.log("bpmnViewer", this.bpmnViewer);
-    //   console.log(this.bpmnModeler.get('propertiesPanel'))
   }
 
   ngAfterViewInit(): void {
-    console.log("After view init: ", this.diagramRef);
-      this.bpmnModeler = new Modeler({
-          container: this.diagramRef.nativeElement,
-          width: '100%',
-          height: '600px',
-            additionalModules: [
-                BpmnPropertiesPanelModule,
-                BpmnPropertiesProviderModule,
-              customControlsModule,
-                customPropertiesProvider,
-            ],
-          propertiesPanel: {
-              parent: this.propertiesRef.nativeElement,
-          }
-      });
-      console.log("Created")
-      // this.bpmnJS = new BpmnJS({
-      //     container: '#canvas',
-      //     propertiesPanel: {
-      //         parent: '#properties'
-      //     }
-      // })
-      if (this.url) {
-          this.loadUrl(this.url);
-      }
-      this.getEvents();
-      this.getElements();
+    this.bpmnModeler.attachTo(this.diagramRef.nativeElement);
+    // @ts-ignore
+    this.propertiesPanel?.attachTo(this.propertiesRef.nativeElement);
   }
 
   ngOnInit(): void {
-    console.log(this.diagramRef)
-
+    if (this.url) {
+      this.loadUrl(this.url);
+    }
     if (this.url) {
       this.loadUrl(this.url);
     }
@@ -144,15 +82,13 @@ export class DiagramComponent implements AfterContentInit, OnChanges, OnDestroy,
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    // re-import whenever the url changes
     if (changes['url'] && this.bpmnModeler) {
       this.loadUrl(changes['url'].currentValue);
     }
   }
 
   ngOnDestroy(): void {
-    // this.bpmnJS.destroy();
-      this.bpmnModeler?.destroy();
+    this.bpmnModeler?.destroy();
   }
 
   private getEvents() {
@@ -170,27 +106,27 @@ export class DiagramComponent implements AfterContentInit, OnChanges, OnDestroy,
       // console.log(event)
     })
 
-    // var eventBus = this.bpmnModeler.get('eventBus');
-
-// you may hook into any of the following events
-//     var events = [
-//       'element.hover',
-//       'element.out',
-//       'element.click',
-//       'element.dblclick',
-//       'element.mousedown',
-//       'element.mouseup'
-//     ];
-//
-//     events.forEach(function(event) {
-//
-//       eventBus.on(event, function(e: object) {
-//         // e.element = the model element
-//         // e.gfx = the graphical element
-//
-//         // console.log(event, 'on', e);
-//       });
-//     });
+    // const eventBus = this.bpmnModeler.get('eventBus');
+    //
+    // const events = [
+    //   'element.hover',
+    //   'element.out',
+    //   'element.click',
+    //   'element.dblclick',
+    //   'element.mousedown',
+    //   'element.mouseup'
+    // ];
+    //
+    // events.forEach(function(event) {
+    //
+    //   // @ts-ignore
+    //   eventBus.on(event, function(e: object) {
+    //     // e.element = the model element
+    //     // e.gfx = the graphical element
+    //
+    //     console.log(event, 'on', e);
+    //   });
+    // });
   }
 
   getElements() {
